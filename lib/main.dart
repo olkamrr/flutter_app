@@ -16,10 +16,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Статистика недели',
+      title: 'Статистика',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        fontFamily: 'Steppe',
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
@@ -57,6 +58,7 @@ class ChartData {
 class _MyHomePageState extends State<MyHomePage> {
   int _sumStep = 0;
   double _distance = 0;
+  double _distanceDay = 0;
   int _activityWeek = 0;
   String _activityCoefficient = '';
   String _comparisonString = '';
@@ -66,6 +68,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   var activity = [1000, 1500, 1700, 2500, 1800, 1600, 1700];
   var steps = [8000, 9000, 15000, 25000, 17000, 10000, 12000];
+  int stepsDay = 0;
+  int activityDay = 0;
 
   final List<ChartData> chartData = [
     ChartData('Зона восстановления', 25),
@@ -87,18 +91,21 @@ class _MyHomePageState extends State<MyHomePage> {
   void stepsWeek() {
     setState(() {
       _sumStep = steps.sum;
+      stepsDay = steps[6];
     });
   }
 
   void distance() {
     setState(() {
-      _distance = _sumStep * 0.0055;
+      _distance = _sumStep * 0.0007;
+      _distanceDay = steps[6] * 0.0007;
     });
   }
 
   void activityWeek() {
     setState(() {
       _activityWeek = activity.sum;
+      activityDay = activity[6];
     });
   }
 
@@ -131,103 +138,146 @@ class _MyHomePageState extends State<MyHomePage> {
     comparison();
     return Scaffold(
       body: Center(
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-            Column(
-              children: [
-                const Text('Статистика недели'),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Column(
-                      children: [
-                        Text(
-                          'Шаги: $_sumStep',
-                        ),
-                        Text('$_distance км'),
-                        SfCartesianChart(
-                            primaryXAxis: CategoryAxis(),
-                            tooltipBehavior: TooltipBehavior(enable: false),
-                            series: <ChartSeries<StatisticsWeek, String>>[
-                              LineSeries<StatisticsWeek, String>(
-                                  dataSource: <StatisticsWeek>[
-                                    StatisticsWeek('ПН', steps[0]),
-                                    StatisticsWeek('ВТ', steps[1]),
-                                    StatisticsWeek('СР', steps[2]),
-                                    StatisticsWeek('ЧТ', steps[3]),
-                                    StatisticsWeek('ПТ', steps[4]),
-                                    StatisticsWeek('СБ', steps[5]),
-                                    StatisticsWeek('ВС', steps[6])
-                                  ],
-                                  xValueMapper: (StatisticsWeek step, _) =>
-                                      step.day,
-                                  yValueMapper: (StatisticsWeek step, _) =>
-                                      step.step,
-                                  // Enable data label
-                                  dataLabelSettings:
-                                      DataLabelSettings(isVisible: true))
-                            ]),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Text('Активность: $_activityWeek кКал'),
-                        Text('$_activityCoefficient'),
-                        SfCartesianChart(
-                            primaryXAxis: CategoryAxis(),
-                            tooltipBehavior: TooltipBehavior(enable: false),
-                            series: <ChartSeries<ActivityWeek, String>>[
-                              LineSeries<ActivityWeek, String>(
-                                  dataSource: <ActivityWeek>[
-                                    ActivityWeek('ПН', activity[0]),
-                                    ActivityWeek('ВТ', activity[1]),
-                                    ActivityWeek('СР', activity[2]),
-                                    ActivityWeek('ЧТ', activity[3]),
-                                    ActivityWeek('ПТ', activity[4]),
-                                    ActivityWeek('СБ', activity[5]),
-                                    ActivityWeek('ВС', activity[6])
-                                  ],
-                                  xValueMapper: (ActivityWeek activity, _) =>
-                                      activity.day,
-                                  yValueMapper: (ActivityWeek activity, _) =>
-                                      activity.activity,
-                                  // Enable data label
-                                  dataLabelSettings:
-                                      DataLabelSettings(isVisible: true))
-                            ]),
-                      ],
-                    ),
-                  ],
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: <
+              Widget>[
+        Column(
+          children: [
+            Container(
+                decoration: BoxDecoration(
+                  color: Color.fromARGB(97, 144, 140, 246),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
                 ),
-                Column(
+                width: 800,
+                //height: 370,
+                child: Column(
                   children: [
-                    const Text('Зоны тренировок'),
-                    SfCircularChart(
-                        legend: Legend(isVisible: true),
-                        series: <CircularSeries>[
-                          // Render pie chart
-                          PieSeries<ChartData, String>(
-                              dataSource: chartData,
-                              xValueMapper: (ChartData data, _) => data.x,
-                              yValueMapper: (ChartData data, _) => data.y,
-                              dataLabelSettings:
-                                  DataLabelSettings(isVisible: true))
-                        ]),
+                    const Text(
+                      'Статистика недели',
+                      style: TextStyle(fontSize: 20),
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        Text('Эффективность тренировок $_efficiency %'),
-                        Text('Продуктивность недели $_productivity %'),
-                        Text(
-                            '$_comparisonString, чем другие пользователи на $_comparison %'),
+                        Column(
+                          children: [
+                            Text(
+                              'Шаги: $_sumStep',
+                            ),
+                            Text('$_distance км'),
+                            SfCartesianChart(
+                                primaryXAxis: CategoryAxis(),
+                                tooltipBehavior: TooltipBehavior(enable: false),
+                                series: <ChartSeries<StatisticsWeek, String>>[
+                                  LineSeries<StatisticsWeek, String>(
+                                      dataSource: <StatisticsWeek>[
+                                        StatisticsWeek('ПН', steps[0]),
+                                        StatisticsWeek('ВТ', steps[1]),
+                                        StatisticsWeek('СР', steps[2]),
+                                        StatisticsWeek('ЧТ', steps[3]),
+                                        StatisticsWeek('ПТ', steps[4]),
+                                        StatisticsWeek('СБ', steps[5]),
+                                        StatisticsWeek('ВС', steps[6])
+                                      ],
+                                      xValueMapper: (StatisticsWeek step, _) =>
+                                          step.day,
+                                      yValueMapper: (StatisticsWeek step, _) =>
+                                          step.step,
+                                      // Enable data label
+                                      dataLabelSettings:
+                                          DataLabelSettings(isVisible: true))
+                                ]),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            Text('Активность: $_activityWeek кКал'),
+                            Text('$_activityCoefficient'),
+                            SfCartesianChart(
+                                primaryXAxis: CategoryAxis(),
+                                tooltipBehavior: TooltipBehavior(enable: false),
+                                series: <ChartSeries<ActivityWeek, String>>[
+                                  LineSeries<ActivityWeek, String>(
+                                      dataSource: <ActivityWeek>[
+                                        ActivityWeek('ПН', activity[0]),
+                                        ActivityWeek('ВТ', activity[1]),
+                                        ActivityWeek('СР', activity[2]),
+                                        ActivityWeek('ЧТ', activity[3]),
+                                        ActivityWeek('ПТ', activity[4]),
+                                        ActivityWeek('СБ', activity[5]),
+                                        ActivityWeek('ВС', activity[6])
+                                      ],
+                                      xValueMapper:
+                                          (ActivityWeek activity, _) =>
+                                              activity.day,
+                                      yValueMapper:
+                                          (ActivityWeek activity, _) =>
+                                              activity.activity,
+                                      // Enable data label
+                                      dataLabelSettings:
+                                          DataLabelSettings(isVisible: true))
+                                ]),
+                          ],
+                        ),
                       ],
-                    )
+                    ),
                   ],
+                )),
+            Column(
+              children: [
+                //const Text('Зоны тренировок'),
+                Container(
+                  width: 800,
+                  height: 250,
+                  color: Color.fromARGB(97, 144, 140, 246),
+                  child: SfCircularChart(
+                      title: ChartTitle(text: 'Зоны тренировок'),
+                      legend: Legend(isVisible: true),
+                      series: <CircularSeries>[
+                        // Render pie chart
+                        PieSeries<ChartData, String>(
+                            dataSource: chartData,
+                            xValueMapper: (ChartData data, _) => data.x,
+                            yValueMapper: (ChartData data, _) => data.y,
+                            dataLabelSettings:
+                                DataLabelSettings(isVisible: true))
+                      ]),
+                ),
+                Container(
+                  width: 800,
+                  decoration: BoxDecoration(
+                  color: Color.fromARGB(97, 144, 140, 246),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
+                  ),
+                ),
+                  child: Column(
+                    children: [
+                      const Text('Статистика дня', style: TextStyle(fontSize: 20),),
+                      Text('Шаги: $stepsDay'),
+                      Text('$_distanceDay км'),
+                      Text('Активность: $activityDay кКал'),
+                      const Text(''),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Text('Эффективность тренировок $_efficiency %'),
+                          Text('Продуктивность недели $_productivity %'),
+                          Text(
+                              '$_comparisonString, чем другие пользователи на $_comparison %'),
+                        ],
+                      )
+                    ],
+                  ),
                 ),
               ],
             ),
-          ])),
+          ],
+        ),
+      ])),
     );
   }
 }
